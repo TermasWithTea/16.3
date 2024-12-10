@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi import HTTPException
 
 app = FastAPI()
 
@@ -9,10 +10,15 @@ async def get_reurn() -> dict:
     return users
 
 @app.post('/user/{username}/{age}')
-async def post_ret(username: str, age: int) -> str:
-    user_id = max(users.keys(), default= 0) +1
+async def post_user(username: str, age: int) -> str:
+    if age < 0:
+        raise HTTPException(status_code=400, detail="Возраст не может быть отрицательным")
+    if users:
+        user_id = str(max(map(int, users.keys())) + 1)
+    else:
+        user_id = '1'
     users[user_id] = f"Имя: {username}, возраст: {age}"
-    return f'User {user_id} is registred!'
+    return f'User {user_id} is registered!'
 
 @app.put('/user/{user_id}/{username}/{age}')
 async def put_ret(user_id: str, username: str, age: str) -> str:
@@ -23,4 +29,3 @@ async def put_ret(user_id: str, username: str, age: str) -> str:
 async def del_del(user_id: str) -> dict:
     del users[user_id]
     return {'message':f'User {user_id} has been deleted'}
-
